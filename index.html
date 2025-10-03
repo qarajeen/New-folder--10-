@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STUDIOO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;600;700&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^18.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^18.2.0/",
+    "react/": "https://aistudiocdn.com/react@^18.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.21.0",
+    "react-dom": "https://aistudiocdn.com/react-dom@^18.2.0"
+  }
+}
+</script>
+    
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {
+              'raisin-black': '#212020',
+              'eggshell-white': '#FAF9F6',
+              'midnight-blue': '#101D42',
+              'deep-ocean-surface': '#1A2B51',
+              'vibrant-magenta': '#D6B585', // Gold for Dark Mode
+              'action-blue': '#2563EB',     // Blue for Light Mode
+            },
+            fontFamily: {
+              'sans': ['IBM Plex Serif', 'serif'],
+              'serif': ['IBM Plex Serif', 'serif'],
+              'amiri': ['Amiri', 'serif'],
+            },
+            keyframes: {
+              'pulse-glow': {
+                '0%, 100%': { opacity: '0.3' },
+                '50%': { opacity: '0.5' },
+              },
+              'glitch': {
+                '0%, 100%': { transform: 'translate(0, 0)', opacity: '1' },
+                '20%': { transform: 'translate(-2px, 2px)', opacity: '0.8' },
+                '40%': { transform: 'translate(2px, -2px)', opacity: '0.8' },
+                '60%': { transform: 'translate(-2px, -2px)', opacity: '0.8' },
+                '80%': { transform: 'translate(2px, 2px)', opacity: '0.8' },
+              },
+              'fade-in-up': {
+                '0%': {
+                  opacity: '0',
+                  transform: 'translateY(20px)'
+                },
+                '100%': {
+                  opacity: '1',
+                  transform: 'translateY(0)'
+                },
+              },
+              'fade-out-up': {
+                '0%': {
+                  opacity: '1',
+                  transform: 'translateY(0)'
+                },
+                '100%': {
+                  opacity: '0',
+                  transform: 'translateY(-20px)'
+                },
+              },
+              'pulse-quick': {
+                '0%, 100%': { transform: 'scale(1)' },
+                '50%': { transform: 'scale(1.05)' },
+              },
+              'fade-in-text': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              'fade-out-text': {
+                '0%': { opacity: '1' },
+                '100%': { opacity: '0' },
+              },
+              'fade-in': {
+                '0%': { opacity: '0' },
+                '100%': { opacity: '1' },
+              },
+              'draw-line': {
+                'from': { 'stroke-dashoffset': '1000' },
+                'to': { 'stroke-dashoffset': '0' },
+              },
+              'fill-in': {
+                'from': { opacity: '0' },
+                'to': { opacity: '1' },
+              },
+              'pop-in': {
+                '0%': { transform: 'scale(0.5)', opacity: '0' },
+                '80%': { transform: 'scale(1.1)', opacity: '1' },
+                '100%': { transform: 'scale(1)', opacity: '1' },
+              },
+              'text-shine': {
+                '0%': { backgroundPosition: '200% center' },
+                '100%': { backgroundPosition: '-200% center' },
+              },
+            },
+            animation: {
+              'pulse-glow': 'pulse-glow 5s ease-in-out infinite',
+              'glitch': 'glitch 0.2s linear',
+              'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
+              'fade-out-up': 'fade-out-up 0.4s ease-out forwards',
+              'pulse-quick': 'pulse-quick 0.4s ease-in-out',
+              'fade-in-text': 'fade-in-text 0.3s ease-out forwards',
+              'fade-out-text': 'fade-out-text 0.3s ease-out forwards',
+              'fade-in': 'fade-in 0.5s ease-out forwards',
+              'draw-line': 'draw-line 0.8s ease-out forwards',
+              'fill-in': 'fill-in 0.3s ease-out forwards',
+              'pop-in': 'pop-in 0.4s ease-out forwards',
+              'text-shine': 'text-shine 3s linear infinite',
+            },
+          },
+        },
+      }
+    </script>
+    <style>
+      @keyframes wave-bg {
+        0% { background-position: 0 50%; }
+        100% { background-position: -2000px 50%; }
+      }
+      
+      :root {
+          --glow-color: rgba(214, 181, 133, 0.08);
+          --wave-stroke-color: rgba(40, 60, 120, 0.07);
+          --line-color: rgba(33, 32, 32, 0.1);
+      }
+
+      .dark {
+          --glow-color: rgba(214, 181, 133, 0.15);
+          --wave-stroke-color: rgba(214,181,133,0.1);
+          --line-color: rgba(250, 249, 246, 0.1);
+      }
+      
+      body {
+        /* background-color is now handled by tailwind classes on the App component */
+        background-image: url("data:image/svg+xml,%3csvg width='2000' height='1000' viewBox='0 0 2000 1000' xmlns='http://www.w3.org/2000/svg'%3e%3cdefs%3e%3cfilter id='f1' x='0' y='0'%3e%3cfeGaussianBlur in='SourceGraphic' stdDeviation='2'/%3e%3c/filter%3e%3c/defs%3e%3cpath d='M 0 200 C 500 100, 1500 300, 2000 200' stroke='var(--wave-stroke-color)' stroke-width='3' fill='none'/%3e%3cpath d='M 0 400 C 500 500, 1500 300, 2000 400' stroke='var(--wave-stroke-color)' stroke-width='2' fill='none' filter='url(%23f1)'/%3e%3cpath d='M 0 600 C 500 500, 1500 700, 2000 600' stroke='var(--wave-stroke-color)' stroke-width='4' fill='none'/%3e%3cpath d='M 0 800 C 500 900, 1500 700, 2000 800' stroke='var(--wave-stroke-color)' stroke-width='2' fill='none' filter='url(%23f1)'/%3e%3c/svg%3e");
+        background-repeat: repeat-x;
+        background-size: 2000px auto;
+        animation: wave-bg 30s linear infinite;
+        transition: background-color 0.3s ease, color 0.3s ease;
+      }
+      
+      /* Interactive mouse-following glow */
+      #root::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        z-index: -1; /* Place it behind content but on top of body bg */
+        pointer-events: none; /* Make it non-interactive */
+        background: radial-gradient(600px circle at var(--mouse-x, -1000px) var(--mouse-y, -1000px), var(--glow-color), transparent 80%);
+        transition: background 0.3s ease;
+      }
+
+       /* Shine Effect */
+      @keyframes shine {
+        from { transform: translateX(-100%) skewX(-25deg); }
+        to { transform: translateX(200%) skewX(-25deg); }
+      }
+
+      .shine-effect {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .shine-effect::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 40%;
+        height: 100%;
+        background: linear-gradient(90deg, rgba(254, 255, 255, 0) 0%, rgba(254, 255, 255, 0.2) 50%, rgba(254, 255, 255, 0) 100%);
+        transform: translateX(-100%) skewX(-25deg);
+        z-index: 1;
+        pointer-events: none;
+      }
+      
+      .shine-effect:hover::after {
+        animation: shine 1s ease-in-out;
+      }
+
+      /* Interactive Shadow for Buttons */
+      .interactive-shadow-container {
+        position: relative;
+        z-index: 1;
+      }
+      .interactive-shadow-container::after {
+        content: '';
+        position: absolute;
+        left: 10%;
+        right: 10%;
+        bottom: 0px;
+        height: 20px;
+        background: #000;
+        border-radius: 50%;
+        filter: blur(15px);
+        opacity: 0;
+        transform: translateY(5px) scale(0.8);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        z-index: -1;
+      }
+      .interactive-shadow-container:hover::after {
+        opacity: 0.4;
+        transform: translateY(10px) scale(1);
+      }
+
+      /* Shadow for circular buttons */
+      .interactive-shadow-container-round {
+        position: relative;
+        z-index: 1;
+      }
+      .interactive-shadow-container-round::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: 2px;
+        width: 80%;
+        height: 80%;
+        background: #000;
+        border-radius: 50%;
+        filter: blur(8px);
+        opacity: 0;
+        transform: translateX(-50%) translateY(5px) scale(0.8);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        z-index: -1;
+      }
+      .interactive-shadow-container-round:hover::after {
+        opacity: 0.5;
+        transform: translateX(-50%) translateY(8px) scale(1);
+      }
+      
+      /* New Inner Lower Shadow Effect */
+      .button-inset-shadow {
+        box-shadow: inset 0 -3px 6px 0 rgba(0, 0, 0, 0.1);
+        transition: box-shadow 0.15s ease-out, transform 0.15s ease-out;
+      }
+
+      .dark .button-inset-shadow {
+         box-shadow: inset 0 -3px 6px 0 rgba(0, 0, 0, 0.4);
+      }
+      
+      .button-inset-shadow:active {
+        box-shadow: inset 0 -1px 2px 0 rgba(0, 0, 0, 0.1);
+        transform: translateY(2px);
+      }
+
+      .dark .button-inset-shadow:active {
+        box-shadow: inset 0 -1px 2px 0 rgba(0, 0, 0, 0.5);
+      }
+      
+      /* New styles for animated SVG line */
+      .line-path {
+          stroke-dasharray: 1000;
+          stroke-dashoffset: 1000;
+      }
+      .line-animated .line-path {
+          animation: draw-line 1.2s cubic-bezier(0.45, 0, 0.55, 1) forwards;
+          animation-delay: 0.3s;
+      }
+
+    </style>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="font-sans">
+    <div id="root"></div>
+    <div id="modal-root"></div>
+    <script type="module" src="./index.tsx"></script>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>
